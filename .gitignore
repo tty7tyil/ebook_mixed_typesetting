@@ -1,0 +1,15 @@
+# Python cache
+__pycache__/
+
+# vim temp file
+.*.swp
+
+# vim undo file
+*.un~
+
+# user files
+ebook_input/
+ebook_output/
+source_css/
+source_fonts/
+
