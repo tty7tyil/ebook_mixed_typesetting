@@ -56,12 +56,13 @@ CLI_OPTIONS_TRIVIAL_HTMLZ_TO_AZW3 = (
     '--no-inline-toc',
 )
 
-NAME_INTERMEDIATE_FILE = 'intermediate.htmlz'
 NAME_EBOOK_INPUT_DIRECTORY = 'ebook_input'
 NAME_EBOOK_OUTPUT_DIRECTORY = 'ebook_output'
 NAME_FONTS_DIRECTORY = 'source_fonts'
 NAME_CSS_DIRECTORY = 'source_css'
 
+NAME_INTERMEDIATE_FILE = 'intermediate'
+FORMAT_EBOOK_INTERMEDIATE = '.htmlz'
 FORMAT_EBOOK_OUTPUT = '.azw3'
 
 working_dir = os.getcwd()
@@ -89,10 +90,11 @@ def main():
 
         print(''.join((
             '\n>> Converting \'{}\'\n'.format(ebook_name),
-            '>> State: {} --> {}, embedding css file\n'.format(
-                format_ebook_input.upper(),
-                '.HTMLZ (intermediate)',
+            '>> State: {} --> {} (intermediate)'.format(
+                format_ebook_input[1:].upper(),
+                FORMAT_EBOOK_INTERMEDIATE[1:].upper(),
             ),
+            ', embedding css file\n',
         )))
         os.system(' '.join((
             EXECUTABLE_EBOOK_CONVERT,
@@ -103,7 +105,7 @@ def main():
             )),
             '"{}"'.format(os.path.join(
                 working_dir,
-                NAME_INTERMEDIATE_FILE,
+                NAME_INTERMEDIATE_FILE + FORMAT_EBOOK_INTERMEDIATE,
             )),
             cli_option_extra_css,
             *CLI_OPTIONS_TRIVIAL,
@@ -116,22 +118,28 @@ def main():
         os.system(' '.join((
             EXECUTABLE_ZIP,
             '-urj0',
-            '"{}"'.format(os.path.join(working_dir, NAME_INTERMEDIATE_FILE)),
-            '"{}"'.format(os.path.join(working_dir, NAME_FONTS_DIRECTORY)),
+            '"{}"'.format(os.path.join(
+                working_dir,
+                NAME_INTERMEDIATE_FILE + FORMAT_EBOOK_INTERMEDIATE,
+            )),
+            '"{}"'.format(os.path.join(
+                working_dir,
+                NAME_FONTS_DIRECTORY,
+            )),
         )))
 
         print(''.join((
             '\n>> Converting \'{}\'\n'.format(ebook_name),
-            '>> State: {} --> {}\n'.format(
-                '.HTMLZ (intermediate)',
-                FORMAT_EBOOK_OUTPUT.upper(),
+            '>> State: {} (intermediate) --> {}\n'.format(
+                FORMAT_EBOOK_INTERMEDIATE[1:].upper(),
+                FORMAT_EBOOK_OUTPUT[1:].upper(),
             ),
         )))
         os.system(' '.join((
             EXECUTABLE_EBOOK_CONVERT,
             '"{}"'.format(os.path.join(
                 working_dir,
-                NAME_INTERMEDIATE_FILE,
+                NAME_INTERMEDIATE_FILE + FORMAT_EBOOK_INTERMEDIATE,
             )),
             '"{}"'.format(os.path.join(
                 working_dir,
@@ -146,7 +154,10 @@ def main():
             '\n>> Converting \'{}\'\n'.format(ebook_name),
             '>> State: removing intermediate file\n',
         )))
-        os.remove(os.path.join(working_dir, NAME_INTERMEDIATE_FILE))
+        os.remove(os.path.join(
+            working_dir,
+            NAME_INTERMEDIATE_FILE + FORMAT_EBOOK_INTERMEDIATE,
+        ))
 
 
 if (__name__ == '__main__'):
