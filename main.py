@@ -83,6 +83,27 @@ FORMAT_EBOOK_OUTPUT = '.azw3'
 working_dir = os.getcwd()
 
 
+def ebook_convert(
+    input_file: str,
+    output_file: str,
+    *ec_cli_options: str,
+) -> None:
+    format_output_file = os.path.splitext(output_file)[1]
+    os.system(' '.join((
+        EXECUTABLE_EBOOK_CONVERT,
+        '"{}"'.format(input_file),
+        '"{}"'.format(output_file),
+        *EC_CLI_OPTIONS_TRIVIAL,
+        (*EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC[
+            format_output_file.lower()
+        ]) if (
+            format_output_file.lower()
+            in EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC
+        ) else '',
+        *ec_cli_options,
+    )))
+
+
 def main():
     # temp
     cli_options_keep_intermediate = True
@@ -119,27 +140,19 @@ def main():
             ),
             ', embedding extra css file\n',
         )))
-        os.system(' '.join((
-            EXECUTABLE_EBOOK_CONVERT,
-            '"{}"'.format(os.path.join(
+        ebook_convert(
+            os.path.join(
                 working_dir,
                 NAME_EBOOK_INPUT_DIRECTORY,
                 ebook_input,
-            )),
-            '"{}"'.format(os.path.join(
+            ),
+            os.path.join(
                 working_dir,
                 NAME_EBOOK_INTERMEDIATE_DIRECTORY,
                 name_ebook_input + FORMAT_EBOOK_INTERMEDIATE,
-            )),
-            *EC_CLI_OPTIONS_TRIVIAL,
-            (*EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC[
-                FORMAT_EBOOK_INTERMEDIATE.lower()
-            ]) if (
-                FORMAT_EBOOK_INTERMEDIATE.lower()
-                in EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC
-            ) else '',
+            ),
             ec_cli_options_extra_css,
-        )))
+        )
 
         # STAGE 2:
         # embed font files
@@ -170,26 +183,18 @@ def main():
                 FORMAT_EBOOK_OUTPUT[1:].upper(),
             ),
         )))
-        os.system(' '.join((
-            EXECUTABLE_EBOOK_CONVERT,
-            '"{}"'.format(os.path.join(
+        ebook_convert(
+            os.path.join(
                 working_dir,
                 NAME_EBOOK_INTERMEDIATE_DIRECTORY,
                 name_ebook_input + FORMAT_EBOOK_INTERMEDIATE,
-            )),
-            '"{}"'.format(os.path.join(
+            ),
+            os.path.join(
                 working_dir,
                 NAME_EBOOK_OUTPUT_DIRECTORY,
                 name_ebook_input + FORMAT_EBOOK_OUTPUT,
-            )),
-            *EC_CLI_OPTIONS_TRIVIAL,
-            (*EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC[
-                FORMAT_EBOOK_OUTPUT.lower()
-            ]) if (
-                FORMAT_EBOOK_OUTPUT.lower()
-                in EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC
-            ) else '',
-        )))
+            ),
+        )
 
         # STAGE 4: (optional)
         # remove intermediate file
