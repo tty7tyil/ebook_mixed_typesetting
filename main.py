@@ -56,7 +56,7 @@ EC_CLI_OPTIONS_TRIVIAL = (
     '--max-toc-links="0"',
     '--no-chapters-in-toc',
 )
-EC_CLI_OPTIONS_FORMAT_SPECIFIC = {
+EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC = {
     '.azw3': (
         '--no-inline-toc',
     ),
@@ -66,6 +66,10 @@ EC_CLI_OPTIONS_FORMAT_SPECIFIC = {
         '--epub-version="3"',
     ),
 }
+
+EC_CLI_OPTIONS_REMOVE_ORIGINAL_TYPESETTING = (
+    '--filter-css="font-family, font-size"'
+)
 
 NAME_EBOOK_INPUT_DIRECTORY = 'ebook_input'
 NAME_EBOOK_INTERMEDIATE_DIRECTORY = 'ebook_intermediate'
@@ -82,6 +86,8 @@ working_dir = os.getcwd()
 def main():
     # temp
     cli_options_keep_intermediate = True
+    cli_options_remove_original_typesetting = True
+    # temp
 
     css_file_list = os.listdir(os.path.join(working_dir, NAME_CSS_DIRECTORY))
     css_file_path: str = None
@@ -113,7 +119,7 @@ def main():
             ),
             ', embedding extra css file\n',
         )))
-        command = ' '.join((
+        os.system(' '.join((
             EXECUTABLE_EBOOK_CONVERT,
             '"{}"'.format(os.path.join(
                 working_dir,
@@ -125,20 +131,15 @@ def main():
                 NAME_EBOOK_INTERMEDIATE_DIRECTORY,
                 name_ebook_input + FORMAT_EBOOK_INTERMEDIATE,
             )),
-            ec_cli_options_extra_css,
             *EC_CLI_OPTIONS_TRIVIAL,
-        ))
-        if (
-            FORMAT_EBOOK_INTERMEDIATE.lower()
-            in EC_CLI_OPTIONS_FORMAT_SPECIFIC
-        ):
-            command = ' '.join((
-                command,
-                *EC_CLI_OPTIONS_FORMAT_SPECIFIC[
-                    FORMAT_EBOOK_INTERMEDIATE.lower()
-                ],
-            ))
-        os.system(command)
+            (*EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC[
+                FORMAT_EBOOK_INTERMEDIATE.lower()
+            ]) if (
+                FORMAT_EBOOK_INTERMEDIATE.lower()
+                in EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC
+            ) else '',
+            ec_cli_options_extra_css,
+        )))
 
         # STAGE 2:
         # embed font files
@@ -169,7 +170,7 @@ def main():
                 FORMAT_EBOOK_OUTPUT[1:].upper(),
             ),
         )))
-        command = ' '.join((
+        os.system(' '.join((
             EXECUTABLE_EBOOK_CONVERT,
             '"{}"'.format(os.path.join(
                 working_dir,
@@ -182,18 +183,13 @@ def main():
                 name_ebook_input + FORMAT_EBOOK_OUTPUT,
             )),
             *EC_CLI_OPTIONS_TRIVIAL,
-        ))
-        if (
-            FORMAT_EBOOK_OUTPUT.lower()
-            in EC_CLI_OPTIONS_FORMAT_SPECIFIC
-        ):
-            command = ' '.join((
-                command,
-                *EC_CLI_OPTIONS_FORMAT_SPECIFIC[
-                    FORMAT_EBOOK_OUTPUT.lower()
-                ],
-            ))
-        os.system(command)
+            (*EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC[
+                FORMAT_EBOOK_OUTPUT.lower()
+            ]) if (
+                FORMAT_EBOOK_OUTPUT.lower()
+                in EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC
+            ) else '',
+        )))
 
         # STAGE 4: (optional)
         # remove intermediate file
