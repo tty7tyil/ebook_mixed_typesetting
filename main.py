@@ -1,35 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# # shell commands for ebook conversion
+# # SHELL COMMANDS IN THE PROCESS
 #
-# ebook-convert
-# $/path/to/input_file
-# $/path/to/intermediate.htmlz
-# --extra-css=$/path/to/css_file
+# ebook-convert $input_file $intermediate_file --extra-css=$css_file $ec_cli_options_trivial
+# zip -urj0 $intermediate_file $fonts_directory
+# ebook-convert $intermediate_file $output_file $ec_cli_options_trivial
+# rm $intermediate_file
+
+# # EBOOK-CONVERT (EC) CLI OPTIONS TRIVIAL
+# # search kw in help: `disable`, `don't`, `preserve`
 #
-# # search for `disable`, `preserve`, `don't`
+# # epub_specific:
+# --preserve-cover-aspect-ratio
+# --no-default-epub-cover
+# --epub-version="3"
 #
+# # azw3_specific:
 # --no-inline-toc
+#
+# # general
 # --disable-font-rescaling
-# --minimum-line-height=0
+# --minimum-line-height="0"
 # --expand-css
-# --margin-top=-1
-# --margin-left=-1
-# --margin-right=-1
-# --margin-bottom=-1
+# --margin-top="-1"
+# --margin-left="-1"
+# --margin-right="-1"
+# --margin-bottom="-1"
 # --keep-ligatures
 # --chapter="/"
 # --chapter-mark="none"
 # --page-breaks-before="/"
 # --disable-remove-fake-margins
-# --max-toc-links=0
+# --max-toc-links="0"
 # --no-chapters-in-toc
-#
-#
-# zip -urj0 $/path/to/intermediate.htmlz $/path/to/fonts_directory
-# ebook-convert $/path/to/intermediate.htmlz $/path/to/output_file $trivial_options
-# rm $/path/to/intermediate.htmlz
 
 import os
 
@@ -38,23 +42,30 @@ EXECUTABLE_ZIP = 'zip'
 
 EC_CLI_OPTIONS_TRIVIAL = (
     '--disable-font-rescaling',
-    '--minimum-line-height=0',
+    '--minimum-line-height="0"',
     '--expand-css',
-    '--margin-top=-1',
-    '--margin-left=-1',
-    '--margin-right=-1',
-    '--margin-bottom=-1',
+    '--margin-top="-1"',
+    '--margin-left="-1"',
+    '--margin-right="-1"',
+    '--margin-bottom="-1"',
     '--keep-ligatures',
     '--chapter="/"',
     '--chapter-mark="none"',
     '--page-breaks-before="/"',
     '--disable-remove-fake-margins',
-    '--max-toc-links=0',
+    '--max-toc-links="0"',
     '--no-chapters-in-toc',
 )
-EC_CLI_OPTIONS_TRIVIAL_AZW3 = (
-    '--no-inline-toc',
-)
+EC_CLI_OPTIONS_FORMAT_SPECIFIC = {
+    '.azw3': (
+        '--no-inline-toc',
+    ),
+    '.epub': (
+        '--preserve-cover-aspect-ratio',
+        '--no-default-epub-cover',
+        '--epub-version="3"',
+    ),
+}
 
 NAME_EBOOK_INPUT_DIRECTORY = 'ebook_input'
 NAME_EBOOK_INTERMEDIATE_DIRECTORY = 'ebook_intermediate'
@@ -102,7 +113,7 @@ def main():
             ),
             ', embedding extra css file\n',
         )))
-        os.system(' '.join((
+        command = ' '.join((
             EXECUTABLE_EBOOK_CONVERT,
             '"{}"'.format(os.path.join(
                 working_dir,
@@ -116,7 +127,18 @@ def main():
             )),
             ec_cli_options_extra_css,
             *EC_CLI_OPTIONS_TRIVIAL,
-        )))
+        ))
+        if (
+            FORMAT_EBOOK_INTERMEDIATE.lower()
+            in EC_CLI_OPTIONS_FORMAT_SPECIFIC
+        ):
+            command = ' '.join((
+                command,
+                *EC_CLI_OPTIONS_FORMAT_SPECIFIC[
+                    FORMAT_EBOOK_INTERMEDIATE.lower()
+                ],
+            ))
+        os.system(command)
 
         # STAGE 2:
         # embed font files
@@ -147,7 +169,7 @@ def main():
                 FORMAT_EBOOK_OUTPUT[1:].upper(),
             ),
         )))
-        command = (' '.join((
+        command = ' '.join((
             EXECUTABLE_EBOOK_CONVERT,
             '"{}"'.format(os.path.join(
                 working_dir,
@@ -160,12 +182,17 @@ def main():
                 name_ebook_input + FORMAT_EBOOK_OUTPUT,
             )),
             *EC_CLI_OPTIONS_TRIVIAL,
-        )))
-        if (FORMAT_EBOOK_OUTPUT.lower() == '.azw3'.lower()):
-            command = (' '.join((
+        ))
+        if (
+            FORMAT_EBOOK_OUTPUT.lower()
+            in EC_CLI_OPTIONS_FORMAT_SPECIFIC
+        ):
+            command = ' '.join((
                 command,
-                *EC_CLI_OPTIONS_TRIVIAL_AZW3,
-            )))
+                *EC_CLI_OPTIONS_FORMAT_SPECIFIC[
+                    FORMAT_EBOOK_OUTPUT.lower()
+                ],
+            ))
         os.system(command)
 
         # STAGE 4: (optional)
