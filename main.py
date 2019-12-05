@@ -36,7 +36,7 @@ import os
 EXECUTABLE_EBOOK_CONVERT = 'ebook-convert'
 EXECUTABLE_ZIP = 'zip'
 
-CLI_OPTIONS_TRIVIAL = (
+EC_CLI_OPTIONS_TRIVIAL = (
     '--disable-font-rescaling',
     '--minimum-line-height=0',
     '--expand-css',
@@ -52,23 +52,26 @@ CLI_OPTIONS_TRIVIAL = (
     '--max-toc-links=0',
     '--no-chapters-in-toc',
 )
-CLI_OPTIONS_TRIVIAL_HTMLZ_TO_AZW3 = (
+EC_CLI_OPTIONS_TRIVIAL_AZW3 = (
     '--no-inline-toc',
 )
 
 NAME_EBOOK_INPUT_DIRECTORY = 'ebook_input'
+NAME_EBOOK_INTERMEDIATE_DIRECTORY = 'ebook_intermediate'
 NAME_EBOOK_OUTPUT_DIRECTORY = 'ebook_output'
 NAME_FONTS_DIRECTORY = 'source_fonts'
 NAME_CSS_DIRECTORY = 'source_css'
 
-NAME_INTERMEDIATE_FILE = 'intermediate'
-FORMAT_EBOOK_INTERMEDIATE = '.htmlz'
+FORMAT_EBOOK_INTERMEDIATE = '.epub'
 FORMAT_EBOOK_OUTPUT = '.azw3'
 
 working_dir = os.getcwd()
 
 
 def main():
+    # temp
+    cli_options_keep_intermediate = True
+
     css_file_list = os.listdir(os.path.join(working_dir, NAME_CSS_DIRECTORY))
     css_file_path: str = None
     if (len(css_file_list) == 1):
@@ -79,22 +82,25 @@ def main():
         )
     else:
         pass  # TODO: raise error here
-    cli_option_extra_css = '--extra-css="{}"'.format(css_file_path)
+    ec_cli_options_extra_css = '--extra-css="{}"'.format(css_file_path)
 
     ebook_input_list = os.listdir(os.path.join(
         working_dir,
         NAME_EBOOK_INPUT_DIRECTORY,
     ))
     for ebook_input in ebook_input_list:
-        ebook_name, format_ebook_input = os.path.splitext(ebook_input)
+        name_ebook_input, format_ebook_input = os.path.splitext(ebook_input)
 
+        # STAGE 1:
+        # convert from input to intermediate
+        # embed extra css file
         print(''.join((
-            '\n>> Converting \'{}\'\n'.format(ebook_name),
-            '>> State: {} --> {} (intermediate)'.format(
+            '\n>> Converting \'{}\'\n'.format(name_ebook_input),
+            '>> Stage: {} --> {} (intermediate)'.format(
                 format_ebook_input[1:].upper(),
                 FORMAT_EBOOK_INTERMEDIATE[1:].upper(),
             ),
-            ', embedding css file\n',
+            ', embedding extra css file\n',
         )))
         os.system(' '.join((
             EXECUTABLE_EBOOK_CONVERT,
@@ -105,22 +111,26 @@ def main():
             )),
             '"{}"'.format(os.path.join(
                 working_dir,
-                NAME_INTERMEDIATE_FILE + FORMAT_EBOOK_INTERMEDIATE,
+                NAME_EBOOK_INTERMEDIATE_DIRECTORY,
+                name_ebook_input + FORMAT_EBOOK_INTERMEDIATE,
             )),
-            cli_option_extra_css,
-            *CLI_OPTIONS_TRIVIAL,
+            ec_cli_options_extra_css,
+            *EC_CLI_OPTIONS_TRIVIAL,
         )))
 
+        # STAGE 2:
+        # embed font files
         print(''.join((
-            '\n>> Converting \'{}\'\n'.format(ebook_name),
-            '>> State: embedding font files\n',
+            '\n>> Converting \'{}\'\n'.format(name_ebook_input),
+            '>> Stage: embedding font files\n',
         )))
         os.system(' '.join((
             EXECUTABLE_ZIP,
             '-urj0',
             '"{}"'.format(os.path.join(
                 working_dir,
-                NAME_INTERMEDIATE_FILE + FORMAT_EBOOK_INTERMEDIATE,
+                NAME_EBOOK_INTERMEDIATE_DIRECTORY,
+                name_ebook_input + FORMAT_EBOOK_INTERMEDIATE,
             )),
             '"{}"'.format(os.path.join(
                 working_dir,
@@ -128,36 +138,48 @@ def main():
             )),
         )))
 
+        # STAGE 3:
+        # convert from intermediate to output
         print(''.join((
-            '\n>> Converting \'{}\'\n'.format(ebook_name),
-            '>> State: {} (intermediate) --> {}\n'.format(
+            '\n>> Converting \'{}\'\n'.format(name_ebook_input),
+            '>> Stage: {} (intermediate) --> {}\n'.format(
                 FORMAT_EBOOK_INTERMEDIATE[1:].upper(),
                 FORMAT_EBOOK_OUTPUT[1:].upper(),
             ),
         )))
-        os.system(' '.join((
+        command = (' '.join((
             EXECUTABLE_EBOOK_CONVERT,
             '"{}"'.format(os.path.join(
                 working_dir,
-                NAME_INTERMEDIATE_FILE + FORMAT_EBOOK_INTERMEDIATE,
+                NAME_EBOOK_INTERMEDIATE_DIRECTORY,
+                name_ebook_input + FORMAT_EBOOK_INTERMEDIATE,
             )),
             '"{}"'.format(os.path.join(
                 working_dir,
                 NAME_EBOOK_OUTPUT_DIRECTORY,
-                ebook_name + FORMAT_EBOOK_OUTPUT,
+                name_ebook_input + FORMAT_EBOOK_OUTPUT,
             )),
-            *CLI_OPTIONS_TRIVIAL,
-            *CLI_OPTIONS_TRIVIAL_HTMLZ_TO_AZW3,
+            *EC_CLI_OPTIONS_TRIVIAL,
         )))
+        if (FORMAT_EBOOK_OUTPUT.lower() == '.azw3'.lower()):
+            command = (' '.join((
+                command,
+                *EC_CLI_OPTIONS_TRIVIAL_AZW3,
+            )))
+        os.system(command)
 
-        print(''.join((
-            '\n>> Converting \'{}\'\n'.format(ebook_name),
-            '>> State: removing intermediate file\n',
-        )))
-        os.remove(os.path.join(
-            working_dir,
-            NAME_INTERMEDIATE_FILE + FORMAT_EBOOK_INTERMEDIATE,
-        ))
+        # STAGE 4: (optional)
+        # remove intermediate file
+        if (cli_options_keep_intermediate is not True):
+            print(''.join((
+                '\n>> Converting \'{}\'\n'.format(name_ebook_input),
+                '>> Stage: removing intermediate file\n',
+            )))
+            os.remove(os.path.join(
+                working_dir,
+                NAME_EBOOK_INTERMEDIATE_DIRECTORY,
+                name_ebook_input + FORMAT_EBOOK_INTERMEDIATE,
+            ))
 
 
 if (__name__ == '__main__'):

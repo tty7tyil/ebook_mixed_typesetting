@@ -9,6 +9,7 @@ __pycache__/
 
 # user files
 ebook_input/
+ebook_intermediate/
 ebook_output/
 source_css/
 source_fonts/
