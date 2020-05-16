@@ -109,6 +109,7 @@ def ebook_convert(
 
 def main():
     # temp
+    cli_options_embed_font_files = True
     cli_options_keep_intermediate = False
     cli_options_remove_original_typesetting = True
     # temp
@@ -181,25 +182,26 @@ def main():
             *ec_cli_options_extra_css,
         )
 
-        # STAGE 2:
+        # STAGE 2: (optional)
         # embed font files
-        print(''.join((
-            '\n>> Converting \'{}\'\n'.format(name_ebook_input),
-            '>> Stage: embedding font files\n',
-        )))
-        os.system(' '.join((
-            EXECUTABLE_ZIP,
-            '-urj0',
-            '"{}"'.format(os.path.join(
-                working_dir,
-                NAME_EBOOK_INTERMEDIATE_DIRECTORY,
-                name_ebook_input + FORMAT_EBOOK_INTERMEDIATE,
-            )),
-            '"{}"'.format(os.path.join(
-                working_dir,
-                NAME_FONTS_DIRECTORY,
-            )),
-        )))
+        if (cli_options_embed_font_files is True):
+            print(''.join((
+                '\n>> Converting \'{}\'\n'.format(name_ebook_input),
+                '>> Stage: embedding font files\n',
+            )))
+            os.system(' '.join((
+                EXECUTABLE_ZIP,
+                '-urj0',
+                '"{}"'.format(os.path.join(
+                    working_dir,
+                    NAME_EBOOK_INTERMEDIATE_DIRECTORY,
+                    name_ebook_input + FORMAT_EBOOK_INTERMEDIATE,
+                )),
+                '"{}"'.format(os.path.join(
+                    working_dir,
+                    NAME_FONTS_DIRECTORY,
+                )),
+            )))
 
         # STAGE 3:
         # convert from intermediate to output
