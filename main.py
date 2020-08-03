@@ -84,7 +84,7 @@ working_dir = os.path.normpath(os.path.join(
 def ebook_convert(
     input_file: str,
     output_file: str,
-    *ec_cli_options: str,
+    *ec_cli_options: Tuple[str, ...],
     cli_options_read_metadata_from_opf: bool = True,
 ) -> None:
     dir_input_file, t = os.path.split(input_file)
@@ -113,7 +113,10 @@ def ebook_convert(
     )))
 
 
-def just_convert(format_ebook_output: str = FORMAT_EBOOK_INTERMEDIATE):
+def just_convert(
+    format_ebook_output: str = FORMAT_EBOOK_INTERMEDIATE,
+    *ec_cli_options: Tuple[str, ...],
+):
     ebook_input_list = os.listdir(os.path.normpath(os.path.join(
         working_dir, NAME_EBOOK_INPUT_DIRECTORY,
     )))
@@ -138,6 +141,7 @@ def just_convert(format_ebook_output: str = FORMAT_EBOOK_INTERMEDIATE):
                 NAME_EBOOK_OUTPUT_DIRECTORY,
                 name_ebook_input + format_ebook_output,
             )),
+            *ec_cli_options,
         )
 
 
