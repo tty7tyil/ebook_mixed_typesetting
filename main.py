@@ -59,13 +59,8 @@ EC_CLI_OPTIONS_TRIVIAL: Tuple[str, ...] = (
     '--no-chapters-in-toc',
 )
 EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC: Mapping[str, Tuple[str, ...]] = {
-    '.azw3': (
-        '--no-inline-toc',
-    ),
-    '.epub': (
-        '--preserve-cover-aspect-ratio',
-        '--no-default-epub-cover',
-    ),
+    '.azw3': ('--no-inline-toc', ),
+    '.epub': ('--preserve-cover-aspect-ratio', '--no-default-epub-cover', ),
 }
 
 EC_CLI_OPTIONS_REMOVE_ORIGINAL_TYPESETTING: Tuple[str, ...] = (
@@ -98,8 +93,10 @@ def ebook_convert(
 
     opf_file = os.path.normpath(os.path.join(dir_input_file, name_input_file)) + '.opf'
     ec_cli_options_read_metadata_from_opf = (
-        '--read-metadata-from-opf="{}"'.format(opf_file),
-    ) if (cli_options_read_metadata_from_opf and os.path.isfile(opf_file)) else ()
+        ('--read-metadata-from-opf="{}"'.format(opf_file), )
+        if (cli_options_read_metadata_from_opf and os.path.isfile(opf_file))
+        else ()
+    )
 
     os.system(' '.join((
         EXECUTABLE_EBOOK_CONVERT,
@@ -107,12 +104,9 @@ def ebook_convert(
         '"{}"'.format(output_file),
         *EC_CLI_OPTIONS_TRIVIAL,
         *(
-            EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC[
-                format_output_file.lower()
-            ] if (
-                format_output_file.lower()
-                in EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC
-            ) else ()
+            EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC[format_output_file.lower()]
+            if (format_output_file.lower() in EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC)
+            else ()
         ),
         *ec_cli_options,
         *ec_cli_options_read_metadata_from_opf,
@@ -121,12 +115,11 @@ def ebook_convert(
 
 def just_convert(format_ebook_output: str = FORMAT_EBOOK_OUTPUT):
     ebook_input_list = os.listdir(os.path.normpath(os.path.join(
-        working_dir,
-        NAME_EBOOK_INPUT_DIRECTORY,
+        working_dir, NAME_EBOOK_INPUT_DIRECTORY,
     )))
     i = 0
-    while (i < len(ebook_input_list)):
-        if (ebook_input_list[i][-4:] == '.opf'):
+    while i < len(ebook_input_list):
+        if ebook_input_list[i][-4:] == '.opf':
             ebook_input_list.pop(i)
         else:
             i += 1
@@ -157,43 +150,24 @@ def main():
 
     css_file_list = os.listdir(os.path.join(working_dir, NAME_CSS_DIRECTORY))
     css_file_path: str = None
-    if (len(css_file_list) == 1):
-        css_file_path = os.path.join(
-            working_dir,
-            NAME_CSS_DIRECTORY,
-            css_file_list[0],
-        )
+    if len(css_file_list) == 1:
+        css_file_path = os.path.join(working_dir, NAME_CSS_DIRECTORY, css_file_list[0], )
     else:
         pass  # TODO: raise error here
-    ec_cli_options_extra_css = (
-        '--extra-css="{}"'.format(css_file_path),
-    )
+    ec_cli_options_extra_css = ('--extra-css="{}"'.format(css_file_path), )
 
-    ebook_input_list = os.listdir(os.path.join(
-        working_dir,
-        NAME_EBOOK_INPUT_DIRECTORY,
-    ))
+    ebook_input_list = os.listdir(os.path.join(working_dir, NAME_EBOOK_INPUT_DIRECTORY, ))
     for ebook_input in ebook_input_list:
         name_ebook_input, format_ebook_input = os.path.splitext(ebook_input)
 
         # STAGE 0:
         # prepare input
         ebook_prepare: str = None
-        if (cli_options_remove_original_typesetting):
-            ebook_prepare = 'prepare_{}'.format(
-                name_ebook_input + FORMAT_EBOOK_INTERMEDIATE
-            )
+        if cli_options_remove_original_typesetting:
+            ebook_prepare = 'prepare_{}'.format(name_ebook_input + FORMAT_EBOOK_INTERMEDIATE)
             ebook_convert(
-                os.path.join(
-                    working_dir,
-                    NAME_EBOOK_INPUT_DIRECTORY,
-                    ebook_input,
-                ),
-                os.path.join(
-                    working_dir,
-                    NAME_EBOOK_INPUT_DIRECTORY,
-                    ebook_prepare,
-                ),
+                os.path.join(working_dir, NAME_EBOOK_INPUT_DIRECTORY, ebook_input, ),
+                os.path.join(working_dir, NAME_EBOOK_INPUT_DIRECTORY, ebook_prepare, ),
                 *EC_CLI_OPTIONS_REMOVE_ORIGINAL_TYPESETTING,
             )
             ebook_input = ebook_prepare
@@ -204,17 +178,12 @@ def main():
         print(''.join((
             '\n>> Converting \'{}\'\n'.format(name_ebook_input),
             '>> Stage: {} --> {} (intermediate)'.format(
-                format_ebook_input[1:].upper(),
-                FORMAT_EBOOK_INTERMEDIATE[1:].upper(),
+                format_ebook_input[1:].upper(), FORMAT_EBOOK_INTERMEDIATE[1:].upper(),
             ),
             ', embedding extra css file\n',
         )))
         ebook_convert(
-            os.path.join(
-                working_dir,
-                NAME_EBOOK_INPUT_DIRECTORY,
-                ebook_input,
-            ),
+            os.path.join(working_dir, NAME_EBOOK_INPUT_DIRECTORY, ebook_input, ),
             os.path.join(
                 working_dir,
                 NAME_EBOOK_INTERMEDIATE_DIRECTORY,
@@ -225,7 +194,7 @@ def main():
 
         # STAGE 2: (optional)
         # embed font files
-        if (cli_options_embed_font_files is True):
+        if cli_options_embed_font_files is True:
             print(''.join((
                 '\n>> Converting \'{}\'\n'.format(name_ebook_input),
                 '>> Stage: embedding font files\n',
@@ -249,8 +218,7 @@ def main():
         print(''.join((
             '\n>> Converting \'{}\'\n'.format(name_ebook_input),
             '>> Stage: {} (intermediate) --> {}\n'.format(
-                FORMAT_EBOOK_INTERMEDIATE[1:].upper(),
-                FORMAT_EBOOK_OUTPUT[1:].upper(),
+                FORMAT_EBOOK_INTERMEDIATE[1:].upper(), FORMAT_EBOOK_OUTPUT[1:].upper(),
             ),
         )))
         ebook_convert(
@@ -260,21 +228,15 @@ def main():
                 name_ebook_input + FORMAT_EBOOK_INTERMEDIATE,
             ),
             os.path.join(
-                working_dir,
-                NAME_EBOOK_OUTPUT_DIRECTORY,
-                name_ebook_input + FORMAT_EBOOK_OUTPUT,
+                working_dir, NAME_EBOOK_OUTPUT_DIRECTORY, name_ebook_input + FORMAT_EBOOK_OUTPUT,
             ),
         )
 
         # STAGE 4: (optional)
         # remove intermediate file
-        if (cli_options_remove_original_typesetting):
-            os.remove(os.path.join(
-                working_dir,
-                NAME_EBOOK_INPUT_DIRECTORY,
-                ebook_prepare,
-            ))
-        if (not cli_options_keep_intermediate):
+        if cli_options_remove_original_typesetting:
+            os.remove(os.path.join(working_dir, NAME_EBOOK_INPUT_DIRECTORY, ebook_prepare, ))
+        if not cli_options_keep_intermediate:
             print(''.join((
                 '\n>> Converting \'{}\'\n'.format(name_ebook_input),
                 '>> Stage: removing intermediate file\n',
@@ -286,5 +248,5 @@ def main():
             ))
 
 
-if (__name__ == '__main__'):
+if __name__ == '__main__':
     main()
