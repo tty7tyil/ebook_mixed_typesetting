@@ -156,8 +156,18 @@ def main():
         pass  # TODO: raise error here
     ec_cli_options_extra_css = ('--extra-css="{}"'.format(css_file_path), )
 
-    ebook_input_list = os.listdir(os.path.join(working_dir, NAME_EBOOK_INPUT_DIRECTORY, ))
+    ebook_input_list = os.listdir(os.path.normpath(os.path.join(
+        working_dir, NAME_EBOOK_INPUT_DIRECTORY,
+    )))
+    i = 0
+    while i < len(ebook_input_list):
+        if ebook_input_list[i][-4:] == '.opf':
+            ebook_input_list.pop(i)
+        else:
+            i += 1
+
     for ebook_input in ebook_input_list:
+        pb.print_banner('CONVERTING: {}'.format(ebook_input), width=120, upper_case=False)
         name_ebook_input, format_ebook_input = os.path.splitext(ebook_input)
 
         # STAGE 0:
