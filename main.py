@@ -36,6 +36,7 @@
 # --no-chapters-in-toc
 
 from typing import Mapping, Tuple
+from lib import print_banner as pb
 import os
 
 EXECUTABLE_EBOOK_CONVERT = 'ebook-convert'
@@ -81,7 +82,9 @@ NAME_CSS_DIRECTORY = 'source_css'
 FORMAT_EBOOK_INTERMEDIATE = '.epub'
 FORMAT_EBOOK_OUTPUT = '.azw3'
 
-working_dir = os.getcwd()
+working_dir = os.path.normpath(os.path.join(
+    os.path.abspath(os.path.dirname(__file__)),
+))
 
 
 def ebook_convert(
@@ -105,6 +108,28 @@ def ebook_convert(
         ),
         *ec_cli_options,
     )))
+
+
+def just_convert(format_ebook_output: str = FORMAT_EBOOK_OUTPUT):
+    ebook_input_list = os.listdir(os.path.normpath(os.path.join(
+        working_dir,
+        NAME_EBOOK_INPUT_DIRECTORY,
+    )))
+    for ebook_input in ebook_input_list:
+        pb.print_banner('CONVERTING: {}'.format(ebook_input), width=120, upper_case=False)
+        name_ebook_input, format_ebook_input = os.path.splitext(ebook_input)
+        ebook_convert(
+            os.path.normpath(os.path.join(
+                working_dir,
+                NAME_EBOOK_INPUT_DIRECTORY,
+                name_ebook_input + format_ebook_input,
+            )),
+            os.path.normpath(os.path.join(
+                working_dir,
+                NAME_EBOOK_OUTPUT_DIRECTORY,
+                name_ebook_input + format_ebook_output,
+            )),
+        )
 
 
 def main():
