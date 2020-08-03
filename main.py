@@ -65,7 +65,6 @@ EC_CLI_OPTIONS_TRIVIAL_FORMAT_SPECIFIC: Mapping[str, Tuple[str, ...]] = {
     '.epub': (
         '--preserve-cover-aspect-ratio',
         '--no-default-epub-cover',
-        '--epub-version="3"',
     ),
 }
 
