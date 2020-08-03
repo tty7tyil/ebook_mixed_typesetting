@@ -113,7 +113,7 @@ def ebook_convert(
     )))
 
 
-def just_convert(format_ebook_output: str = FORMAT_EBOOK_OUTPUT):
+def just_convert(format_ebook_output: str = FORMAT_EBOOK_INTERMEDIATE):
     ebook_input_list = os.listdir(os.path.normpath(os.path.join(
         working_dir, NAME_EBOOK_INPUT_DIRECTORY,
     )))
