@@ -90,8 +90,17 @@ def ebook_convert(
     input_file: str,
     output_file: str,
     *ec_cli_options: str,
+    cli_options_read_metadata_from_opf: bool = True,
 ) -> None:
+    dir_input_file, t = os.path.split(input_file)
+    name_input_file = os.path.splitext(t)[0]
     format_output_file = os.path.splitext(output_file)[1]
+
+    opf_file = os.path.normpath(os.path.join(dir_input_file, name_input_file)) + '.opf'
+    ec_cli_options_read_metadata_from_opf = (
+        '--read-metadata-from-opf="{}"'.format(opf_file),
+    ) if (cli_options_read_metadata_from_opf and os.path.isfile(opf_file)) else ()
+
     os.system(' '.join((
         EXECUTABLE_EBOOK_CONVERT,
         '"{}"'.format(input_file),
@@ -106,6 +115,7 @@ def ebook_convert(
             ) else ()
         ),
         *ec_cli_options,
+        *ec_cli_options_read_metadata_from_opf,
     )))
 
 
@@ -114,6 +124,13 @@ def just_convert(format_ebook_output: str = FORMAT_EBOOK_OUTPUT):
         working_dir,
         NAME_EBOOK_INPUT_DIRECTORY,
     )))
+    i = 0
+    while (i < len(ebook_input_list)):
+        if (ebook_input_list[i][-4:] == '.opf'):
+            ebook_input_list.pop(i)
+        else:
+            i += 1
+
     for ebook_input in ebook_input_list:
         pb.print_banner('CONVERTING: {}'.format(ebook_input), width=120, upper_case=False)
         name_ebook_input, format_ebook_input = os.path.splitext(ebook_input)
