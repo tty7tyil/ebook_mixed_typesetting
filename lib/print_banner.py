@@ -3,6 +3,7 @@
 
 from enum import Enum, unique
 from lib import unicode_character_align_east_asian as uca
+import datetime as dt
 
 MESSAGE_TYPE = unique(Enum(
     'MESSAGE_TYPE', (
@@ -19,6 +20,7 @@ def print_banner(
     border: str = None,
     fill: str = None,
     align: str = None,
+    include_timestamp: bool = False,
 ) -> str:
     if upper_case:
         message = message.upper()
@@ -47,7 +49,16 @@ def print_banner(
         fill_width = width - len(fill) * 3 * 2 - (uca.count_visual_length(message) - len(message))
 
     banner = '\n'.join((
-        border * width,
+        '{edge}{timestamp:{border}>{fill_width}}{edge}'.format(
+            edge=border * 2,
+            timestamp=' {} '.format(
+                '{} {} {}'.format((
+                    t := dt.datetime.now(dt.timezone.utc).isoformat(timespec='milliseconds')
+                )[0:10], t[11:23], t[23:], )
+            ),
+            border=border,
+            fill_width=width - len(border) * 2 * 2,
+        ) if include_timestamp else border * width,
         message_line_format.format(
             border=border, message=message, fill=fill, align=align, fill_width=fill_width,
         ),
