@@ -16,13 +16,19 @@ def print_banner(
     message_type: MESSAGE_TYPE = MESSAGE_TYPE.NORMAL,
     width: int = 80,
     upper_case: bool = True,
+    border: str = None,
+    fill: str = None,
+    align: str = None,
 ) -> str:
     if upper_case:
         message = message.upper()
 
-    border = '#' if (message_type is MESSAGE_TYPE.NORMAL) else '!'
-    fill = ' '
-    align = '^'
+    if border is None:
+        border = '#' if (message_type is MESSAGE_TYPE.NORMAL) else '!'
+    if fill is None:
+        fill = ' '
+    if align is None:
+        align = '^'
 
     message_line_format = ''
     fill_width = 0
