@@ -49,12 +49,12 @@ def print_banner(
         fill_width = width - len(fill) * 3 * 2 - (uca.count_visual_length(message) - len(message))
 
     banner = '\n'.join((
-        '{edge}{timestamp:{border}>{fill_width}}{edge}'.format(
+        '{edge}{timestamp:{border}^{fill_width}}{edge}'.format(
             edge=border * 2,
             timestamp=' {} '.format(
                 '{} {} {}'.format((
                     t := dt.datetime.now(dt.timezone.utc).isoformat(timespec='milliseconds')
-                )[0:10], t[11:23], t[23:], )
+                )[0:10], t[11:23], t[23:], ),
             ),
             border=border,
             fill_width=width - len(border) * 2 * 2,
