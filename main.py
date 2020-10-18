@@ -217,7 +217,7 @@ def main():
             )))
             os.system(' '.join((
                 EXECUTABLE_ZIP,
-                '-urj0',
+                '-urj0 -UN=UTF8',
                 '"{}"'.format(os.path.join(
                     working_dir,
                     NAME_EBOOK_INTERMEDIATE_DIRECTORY,
