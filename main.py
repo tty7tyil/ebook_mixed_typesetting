@@ -70,8 +70,8 @@ EC_CLI_OPTIONS_REMOVE_ORIGINAL_TYPESETTING: Tuple[str, ...] = (
 NAME_EBOOK_INPUT_DIRECTORY = 'ebook_input'
 NAME_EBOOK_INTERMEDIATE_DIRECTORY = 'ebook_intermediate'
 NAME_EBOOK_OUTPUT_DIRECTORY = 'ebook_output'
-NAME_FONTS_DIRECTORY = 'source_fonts'
-NAME_CSS_DIRECTORY = 'source_css'
+NAME_FONTS_DIRECTORY = 'source/font'
+NAME_CSS_DIRECTORY = 'source/css'
 
 FORMAT_EBOOK_INTERMEDIATE = '.epub'
 FORMAT_EBOOK_OUTPUT = '.azw3'
@@ -152,10 +152,12 @@ def main():
     cli_options_remove_original_typesetting = True
     # temp
 
-    css_file_list = os.listdir(os.path.join(working_dir, NAME_CSS_DIRECTORY))
+    css_file_list = os.listdir(os.path.normpath(os.path.join(working_dir, NAME_CSS_DIRECTORY)))
     css_file_path: str = None
     if len(css_file_list) == 1:
-        css_file_path = os.path.join(working_dir, NAME_CSS_DIRECTORY, css_file_list[0], )
+        css_file_path = os.path.normpath(os.path.join(
+            working_dir, NAME_CSS_DIRECTORY, css_file_list[0],
+        ))
     else:
         pass  # TODO: raise error here
     ec_cli_options_extra_css = ('--extra-css="{}"'.format(css_file_path), )
@@ -221,10 +223,10 @@ def main():
                     NAME_EBOOK_INTERMEDIATE_DIRECTORY,
                     name_ebook_input + FORMAT_EBOOK_INTERMEDIATE,
                 )),
-                '"{}"'.format(os.path.join(
+                '"{}"'.format(os.path.normpath(os.path.join(
                     working_dir,
                     NAME_FONTS_DIRECTORY,
-                )),
+                ))),
             )))
 
         # STAGE 3:
